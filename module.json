@@ -1,0 +1,35 @@
+{
+    "type": "em",
+    "group": "Core",
+    "name": "vortex.modules.builtin.toolchains",
+    "proper_name": "Toolchains",
+    "auto_exec": true,
+    "version": "1.1.0",
+    "author": "Infinite Tech",
+    "contributors": [
+        "Diego E. Moreno <d@infinite.si>"
+    ],
+    "deps": [
+        {
+            "name": "vortex.modules.builtin.tasks",
+            "type": "em",
+            "versions": [
+                "1.1.0"
+            ]
+        },
+        {
+            "name": "vortex.modules.builtin.tasklists",
+            "type": "em",
+            "versions": [
+                "1.1.0"
+            ]
+        }
+    ],
+    "compatibility": [
+        "1.0",
+        "1.1"
+    ],
+    "path": "./build/libmodule.so",
+    "picture": "./assets/logo.png",
+    "description": "This is a module that allow the creation, manipulation, development & production of a toolchain"
+}
