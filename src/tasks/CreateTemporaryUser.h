@@ -1,3 +1,5 @@
+#ifndef DISABLE_MODULE
+
 #include "../module.h"
 
 
@@ -144,3 +146,5 @@ struct CreateTemporaryUser : public Task
     }
   }
 };
+
+#endif

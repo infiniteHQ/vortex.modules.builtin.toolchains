@@ -1,7 +1,10 @@
-#include "../../vortex.modules.builtin.tasks/src/module.h"
-#include "../../vortex.modules.builtin.tasklists/src/module.h"
-#include "../../vortex.modules.builtin.packages/src/module.h"
-#include "../../vortex.modules.builtin.packages/src/instances/packageInstance/PackageRenderInstance.h"
+
+#ifndef DISABLE_MODULE
+
+#include <Vortex/modules/vortex.modules.builtin.tasks.1.1.0/src/module.h>
+#include <Vortex/modules/vortex.modules.builtin.tasklists.1.1.0/src/module.h>
+#include <Vortex/modules/vortex.modules.builtin.packages.1.1.0/src/module.h>
+#include <Vortex/modules/vortex.modules.builtin.packages.1.1.0/src/instances/packageInstance/PackageRenderInstance.h>
 
 #include <Vortex/main/include/vortex.h>
 #include <Vortex/main/include/vortex_internals.h>
@@ -290,3 +293,4 @@ static void RegisterToolchains()
 
 
 #endif // __TOOLCHAIN__MODULE_H__
+#endif

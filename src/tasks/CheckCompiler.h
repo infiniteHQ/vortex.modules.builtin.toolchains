@@ -1,3 +1,5 @@
+#ifndef DISABLE_MODULE
+
 #include "../module.h"
 
 struct CheckCompiler : public Task
@@ -167,3 +169,4 @@ struct CheckCompiler : public Task
     }
   }
 };
+#endif

@@ -1,4 +1,6 @@
 
+#ifndef DISABLE_MODULE
+
 #include "./src/instances/toolchainInstance/ToolchainRenderInstance.h"
 #include "./src/module.h"
 
@@ -20,7 +22,6 @@ TasklistModuleCTX *CTasklistsModule = NULL;
 
 
 // TODO : Documentation des apis & vortex install "modulname" & vortex register (current dir)
-// TODO : Toolchains & task reconsitution & VIDEO
 
 class ToolchainsModule : public ModuleInterface
 {
@@ -111,3 +112,5 @@ extern "C" ModuleInterface *create_em()
 }
 
 // Initialiser les modules dans le contexte depuis le vortex.config
+
+#endif

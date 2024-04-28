@@ -1,3 +1,4 @@
+#ifndef DISABLE_MODULE
 #include "../ToolchainRenderInstance.h"
 
 static std::vector<std::shared_ptr<Task>> tasklist;
@@ -594,3 +595,4 @@ void ToolchainRenderInstance::UI_VolatileTasks()
         ImGui::End();
     }
 }
+#endif

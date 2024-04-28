@@ -1,3 +1,6 @@
+#ifndef DISABLE_MODULE
+
+
 #include "../../../assets/logo.h"
 #include "../../module.h"
 
@@ -75,3 +78,4 @@ public:
 };
 
 #endif // ToolchainModulesInstance_H
+#endif

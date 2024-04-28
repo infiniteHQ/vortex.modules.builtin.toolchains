@@ -1,3 +1,4 @@
+#ifndef DISABLE_MODULE
 #include "ToolchainRenderInstance.h"
 
 using namespace VortexMaker;
@@ -561,3 +562,5 @@ void ToolchainRenderInstance::Save()
     this->toolchain->PushSave(this->m_currentSave);
     this->toolchain->PushDistSave(this->m_currentDistSave);
 }
+
+#endif

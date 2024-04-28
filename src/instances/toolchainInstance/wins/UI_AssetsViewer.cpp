@@ -1,3 +1,5 @@
+#ifndef DISABLE_MODULE
+
 #include "../ToolchainRenderInstance.h"
 //#include "../../../Assets/Package/PackageInstance.h"
 
@@ -124,3 +126,5 @@ void ToolchainRenderInstance::UI_AssetsViewer()
         ImGui::End();
     }
 }
+
+#endif

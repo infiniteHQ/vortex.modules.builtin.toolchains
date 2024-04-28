@@ -1,3 +1,5 @@
+#ifndef DISABLE_MODULE
+
 // Toolchain task API
 // Task : buildPackage
 // Date : 03/11/2024
@@ -222,3 +224,5 @@ struct ExecuteTasklist : public Task
     }
   }
 };
+
+#endif

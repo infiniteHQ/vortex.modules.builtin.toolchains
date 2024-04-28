@@ -1,3 +1,4 @@
+#ifndef DISABLE_MODULE
 #include "../ToolchainRenderInstance.h"
 #include <array>
 #include <random>
@@ -613,3 +614,4 @@ void ToolchainRenderInstance::UI_TasksEditor()
         ImGui::End();
     }
 }
+#endif

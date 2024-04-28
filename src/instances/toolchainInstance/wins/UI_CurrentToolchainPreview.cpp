@@ -1,3 +1,4 @@
+#ifndef DISABLE_MODULE
 #include "../ToolchainRenderInstance.h"
 
 static std::string formatElapsedTime(double elapsedSeconds)
@@ -652,3 +653,4 @@ progressBar(progress);
         ImGui::End();
     }
 }
+#endif

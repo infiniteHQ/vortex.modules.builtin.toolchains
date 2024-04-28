@@ -1,3 +1,5 @@
+#ifndef DISABLE_MODULE
+
 #include "../module.h"
 
 struct InstallPackage : public Task
@@ -159,3 +161,5 @@ struct InstallPackage : public Task
     }
   }
 };
+
+#endif

@@ -1,3 +1,5 @@
+#ifndef DISABLE_MODULE
+
 #include "../module.h"
 
 
@@ -174,3 +176,5 @@ struct ConfigurePackage : public Task
     }
   }
 };
+
+#endif

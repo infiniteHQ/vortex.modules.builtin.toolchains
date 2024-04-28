@@ -1,3 +1,6 @@
+#ifndef DISABLE_MODULE
+
+
 #include "../module.h"
 
 /**
@@ -174,3 +177,5 @@ struct CompilePackage : public Task
     }
   }
 };
+
+#endif

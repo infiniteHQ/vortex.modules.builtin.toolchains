@@ -1,3 +1,4 @@
+#ifndef DISABLE_MODULE
 #include "../ToolchainRenderInstance.h"
 
 void ToolchainRenderInstance::UI_ContentWindow()
@@ -32,3 +33,4 @@ void ToolchainRenderInstance::UI_ContentWindow()
         ImGui::End();
     }
 }
+#endif

@@ -1,3 +1,5 @@
+#ifndef DISABLE_MODULE
+
 #include "module.h"
 
 #include "tasks/CheckCompiler.h"
@@ -1047,3 +1049,4 @@ TOOLCHAIN_MODULE_API bool ToolchainModule::RegisterNewToolchain(std::shared_ptr<
 }
 
 // MODULE FUNCTION
+#endif

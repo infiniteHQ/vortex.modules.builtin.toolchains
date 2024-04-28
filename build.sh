@@ -3,3 +3,4 @@ mkdir build
 cd build
 cmake ..
 make install
+# install with vortex on env

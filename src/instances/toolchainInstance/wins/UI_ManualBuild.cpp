@@ -1,3 +1,4 @@
+#ifndef DISABLE_MODULE
 #include "../ToolchainRenderInstance.h"
 #include <array>
 
@@ -123,3 +124,4 @@ void ToolchainRenderInstance::UI_ManualBuild()
         ImGui::End();
     }
 }
+#endif
