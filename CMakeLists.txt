@@ -1,37 +1,34 @@
 cmake_minimum_required(VERSION 3.0)
 project(module)
+set(MODULE_TAG "vortex.modules.builtin.tasklists.1.1.0")
 
-# Inclure la bibliothèque partagée vortex_shared
+
+message("Building " ${MODULE_TAG})
+
+# Include vortex library
 find_library(VORTEX_SHARED_LIBRARY vortex_shared HINTS /lib)
 
-# Vérifier si la bibliothèque a été trouvée
+# Vortex verificatioon
 if(NOT VORTEX_SHARED_LIBRARY)
-    message(FATAL_ERROR "Please build/install the vortex core before compiling modules !")
+    message(FATAL_ERROR "Please build/install the vortex core before compiling modules!")
 endif()
 
-
-# Sources du plugin
-set(SOURCES
-    main.cpp
-    src/toolchain.cpp
-    src/instances/toolchainInstance/ToolchainRenderInstance.cpp
-    src/instances/toolchainInstance/wins/UI_AssetsViewer.cpp
-    src/instances/toolchainInstance/wins/UI_ParameterWindow.cpp
-    src/instances/toolchainInstance/wins/UI_CurrentToolchainPreview.cpp
-    src/instances/toolchainInstance/wins/UI_ContentWindow.cpp
-    src/instances/toolchainInstance/wins/UI_VolatileTasks.cpp
-    src/instances/toolchainInstance/wins/UI_TasksEditor.cpp
-    src/instances/toolchainInstance/wins/UI_FullBuild.cpp
-    src/instances/toolchainInstance/wins/UI_ManualBuild.cpp
-    src/instances/toolchainInstance/wins/UI_SnapshotUtility.cpp
-    src/instances/toolchainInstance/wins/UI_MainSettings.cpp
-)
-
-# Création de la bibliothèque partagée (.so)
+# Create module.so
+file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 add_library(module SHARED ${SOURCES})
 
-# Option de compilation
+# Compile & link
 target_compile_options(module PRIVATE -Wall -Wextra)
-
-# Liaison avec la bibliothèque partagée vortex_shared
 target_link_libraries(module PRIVATE ${VORTEX_SHARED_LIBRARY})
+target_include_directories(module PRIVATE /usr/include/Vortex)
+
+set(MODULE_TAG "vortex.modules.builtin.tasklists.1.1.0")
+set(INSTALL_INCLUDE_DIR /usr/local/include/Vortex/modules/${MODULE_TAG}/)
+
+# Installation des fichiers d'en-tête de /main/include
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+        DESTINATION ${INSTALL_INCLUDE_DIR}/
+        PATTERN "*.h"
+        PATTERN "*.hpp"
+        PATTERN "*.inl"
+)

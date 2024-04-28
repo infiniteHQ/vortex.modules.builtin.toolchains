@@ -1,17 +1,14 @@
-#include "../../../include/vortex.h"
-#include "../../../include/vortex_internals.h"
-
 #include "../../vortex.modules.builtin.tasks/src/module.h"
-
 #include "../../vortex.modules.builtin.tasklists/src/module.h"
-
 #include "../../vortex.modules.builtin.packages/src/module.h"
 #include "../../vortex.modules.builtin.packages/src/instances/packageInstance/PackageRenderInstance.h"
 
+#include <Vortex/main/include/vortex.h>
+#include <Vortex/main/include/vortex_internals.h>
+#include <Vortex/tools/editor/app/include/editor.h>
+
 #ifndef __TOOLCHAIN__MODULE_H__
 #define __TOOLCHAIN__MODULE_H__
-
-
 
 class Toolchain;
 struct ToolchainsModuleCTX

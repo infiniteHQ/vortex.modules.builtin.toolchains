@@ -25,7 +25,7 @@ static void refreshTaskList(const char *poolname)
 }
 
 
-#include "../toolchain.h"
+#include "../module.h"
 
 struct Task;
 

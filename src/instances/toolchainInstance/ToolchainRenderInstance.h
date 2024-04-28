@@ -1,9 +1,5 @@
-
-#include "../../../../../../lib/uikit/uikit.h"
-#include "../../../../../../main/include/vortex.h"
 #include "../../../assets/logo.h"
-#include "../../../../../../main/include/vortex_internals.h"
-#include "../../toolchain.h"
+#include "../../module.h"
 
 #ifndef ToolchainModulesInstance_H
 #define ToolchainModulesInstance_H
