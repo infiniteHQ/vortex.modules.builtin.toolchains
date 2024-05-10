@@ -738,10 +738,10 @@ void Toolchain::FindTasklists()
 
 void Toolchain::Refresh()
 {
-  VortexMaker::LogInfo("Core", "Refreshing toolchain " + this->name + " from " + this->configFilePath);
+  CToolchainModule->m_interface->LogInfo("Refreshing toolchain " + this->name + " from " + this->configFilePath);
   nlohmann::json toolchainData = VortexMaker::DumpJSON(this->configFilePath);
 
-  VortexMaker::LogInfo("Core", "Getting toolchain \"toolchain\" datas from " + this->configFilePath);
+  CToolchainModule->m_interface->LogInfo("Getting toolchain \"toolchain\" datas from " + this->configFilePath);
   this->name = toolchainData["toolchain"]["name"].get<std::string>();
   this->author = toolchainData["toolchain"]["author"].get<std::string>();
   this->description = toolchainData["toolchain"]["description"].get<std::string>();
@@ -749,7 +749,7 @@ void Toolchain::Refresh()
   this->type = toolchainData["toolchain"]["type"].get<std::string>();
   this->state = toolchainData["toolchain"]["state"].get<std::string>();
 
-  VortexMaker::LogInfo("Core", "Getting toolchain \"configs\" datas from " + this->configFilePath);
+  CToolchainModule->m_interface->LogInfo("Getting toolchain \"configs\" datas from " + this->configFilePath);
   this->builder_vendor = toolchainData["configs"]["builder_vendor"].get<std::string>();
   this->builder_arch = toolchainData["configs"]["builder_arch"].get<std::string>();
   this->builder_platform = toolchainData["configs"]["builder_platform"].get<std::string>();
@@ -772,12 +772,12 @@ void Toolchain::Refresh()
 
   this->compressionMode = toolchainData["configs"]["compression"].get<std::string>();
 
-  VortexMaker::LogInfo("Core", "Getting toolchain \"data\" informations from " + this->configFilePath);
+  CToolchainModule->m_interface->LogInfo("Getting toolchain \"data\" informations from " + this->configFilePath);
   this->localPackagesPath = toolchainData["data"]["packages"].get<std::string>();
   this->localPatchsPath = toolchainData["data"]["patchs"].get<std::string>();
   this->localScriptsPath = toolchainData["data"]["scripts"].get<std::string>();
 
-  VortexMaker::LogInfo("Core", "Refreshing packages asset of " + this->name);
+  CToolchainModule->m_interface->LogInfo("Refreshing packages asset of " + this->name);
   registeredPackages.clear();
   nlohmann::json packages = toolchainData["content"]["packages"];
   for (auto &pkg : packages)
@@ -790,7 +790,7 @@ void Toolchain::Refresh()
     registeredPackages.push_back(newPackageInterface);
   }
 
-  VortexMaker::LogInfo("Core", "Finding packages asset of " + this->name);
+  CToolchainModule->m_interface->LogInfo("Finding packages asset of " + this->name);
 
   // this->FindPackages();
   {
@@ -806,7 +806,7 @@ void Toolchain::Refresh()
 
   this->InitTasks();
 
-  VortexMaker::LogInfo("Core", "Refreshing tasklists asset of " + this->name);
+  CToolchainModule->m_interface->LogInfo("Refreshing tasklists asset of " + this->name);
 
   registeredTasklists.clear();
   nlohmann::json tasklists = toolchainData["content"]["tasklists"];
@@ -814,10 +814,10 @@ void Toolchain::Refresh()
   {
      this->RegisterTasklist(t["label"].get<std::string>());
   }
-  VortexMaker::LogInfo("Core", "Finding tasklists asset of " + this->name);
+  CToolchainModule->m_interface->LogInfo("Finding tasklists asset of " + this->name);
   this->FindTasklists();
 
-  VortexMaker::LogInfo("Core", "Refreshing toolchain " + this->name + " is finish !");
+  CToolchainModule->m_interface->LogInfo("Refreshing toolchain " + this->name + " is finish !");
   // this->Init();
 }
 
@@ -828,12 +828,12 @@ void ToolchainCurrentSystem::Save(std::shared_ptr<Toolchain> parent)
   if (file.is_open())
   {
     file << std::setw(4) << data << std::endl;
-    VortexMaker::LogInfo("Core", "Object saved to " + parent->workingPath + "/working_host.config");
+  CToolchainModule->m_interface->LogInfo("Object saved to " + parent->workingPath + "/working_host.config");
     file.close();
   }
   else
   {
-    VortexMaker::LogError("Core", "Unable to open file " + parent->workingPath + "/working_host.config" + " for writing!");
+  CToolchainModule->m_interface->LogInfo("Unable to open file " + parent->workingPath + "/working_host.config" + " for writing!");
   }
 }
 
@@ -1004,7 +1004,7 @@ TOOLCHAIN_MODULE_API bool ToolchainModule::RegisterNewToolchain(std::shared_ptr<
   // this->FindPackages();
 
   {
-    VortexMaker::LogInfo("Core", "Finding packages asset of " + toolchain->name);
+  CToolchainModule->m_interface->LogInfo("Finding packages asset of " + toolchain->name);
     std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
     args->add("packages", toolchain->packages);
     args->add("list", toolchain->registeredPackages);

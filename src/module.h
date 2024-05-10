@@ -1,8 +1,16 @@
 
 #ifndef DISABLE_MODULE
 
-#include <Vortex/modules/vortex.modules.builtin.tasks.1.1.0/src/module.h>
+/**
+ * Warning : Recursive dependance for vortex.modules.builtin.tasklists
+ * 
+ * @brief This toolchain module is used in tasklists module only as header library, the tasklists module don't interact with this module's stuffs
+ * 
+ * */
 #include <Vortex/modules/vortex.modules.builtin.tasklists.1.1.0/src/module.h>
+/**/
+
+#include <Vortex/modules/vortex.modules.builtin.tasks.1.1.0/src/module.h>
 #include <Vortex/modules/vortex.modules.builtin.packages.1.1.0/src/module.h>
 #include <Vortex/modules/vortex.modules.builtin.packages.1.1.0/src/instances/packageInstance/PackageRenderInstance.h>
 

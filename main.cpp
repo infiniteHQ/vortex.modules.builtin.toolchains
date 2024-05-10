@@ -4,22 +4,18 @@
 #include "./src/instances/toolchainInstance/ToolchainRenderInstance.h"
 #include "./src/module.h"
 
-
 #ifndef CToolchainModule
 ToolchainsModuleCTX *CToolchainModule = NULL;
 #endif
 
-
 PackagesModuleCTX *CPackagesModule = NULL;
 TasklistModuleCTX *CTasklistsModule = NULL;
 
-
- void CreateModuleContext(){
-  ToolchainsModuleCTX *ctx = VX_NEW(ToolchainsModuleCTX);
-  CToolchainModule = ctx;
+void CreateModuleContext()
+{
+    ToolchainsModuleCTX *ctx = VX_NEW(ToolchainsModuleCTX);
+    CToolchainModule = ctx;
 }
-
-
 
 // TODO : Documentation des apis & vortex install "modulname" & vortex register (current dir)
 
@@ -28,29 +24,29 @@ class ToolchainsModule : public ModuleInterface
 public:
     /**
      * @brief When the module is turning on, this function is executed. In this, all components are declared, all contents are loaded
-    */
+     */
     void execute() override
     {
         CreateModuleContext();
         CToolchainModule->m_interface = ModuleInterface::GetEditorModuleByName(this->m_name);
-        
-        
-        // Adding functions
-        this->AddFunction(RegisterToolchains, "RegisterToolchains");
 
+        // Adding functions
+        // Pouvoir mettre des flags, et autres paramètre pour les fonctions, evenements, etc....
+        this->AddFunction(
+            RegisterToolchains,
+            "RegisterToolchains");
 
         this->ExecFunction("RegisterToolchains");
         // Adding events
-
     }
 
     /**
      * @brief This is the main rendering channel. There is the main "window" of the module.
-    */
+     */
     void render() override
     {
-        
-		ImGui::Begin("Toolchains");
+
+        ImGui::Begin("Toolchains");
         static ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 
         if (ImGui::BeginTable("table_", 3, flags))
@@ -96,14 +92,14 @@ public:
         ImGui::End();
         // "Launcher" of regitered toolchains
     }
-/*
-    void openToolchain(){ // Make a function
-        // Get instance, open it and create a render instance
+    /*
+        void openToolchain(){ // Make a function
+            // Get instance, open it and create a render instance
 
-        // Ctx (from module), Toolchain
-        ToolchainRenderInstance instance(VortexMaker::GetCurrentContext(), nullptr);
-        this->AddModuleRenderInstance(instance);
-    }*/
+            // Ctx (from module), Toolchain
+            ToolchainRenderInstance instance(VortexMaker::GetCurrentContext(), nullptr);
+            this->AddModuleRenderInstance(instance);
+        }*/
 };
 
 extern "C" ModuleInterface *create_em()
