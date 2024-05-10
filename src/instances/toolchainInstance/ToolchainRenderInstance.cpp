@@ -5,12 +5,17 @@ using namespace VortexMaker;
 
 ToolchainRenderInstance::ToolchainRenderInstance(VxContext *ctx, std::shared_ptr<Toolchain> _toolchain)
 {
+    std::cout << "LL" << std::endl;
     this->m_ctx = ctx;
     this->toolchain = _toolchain;
+    std::cout << "LL" << std::endl;
 
     this->Refresh();
+    std::cout << "LL" << std::endl;
     this->toolchain->RefreshCurrentWorkingToolchain();
+    std::cout << "LL" << std::endl;
     this->toolchain->RefreshSnapshots();
+    std::cout << "LL" << std::endl;
 
     {
         uint32_t w, h;

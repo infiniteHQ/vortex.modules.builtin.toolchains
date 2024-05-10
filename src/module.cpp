@@ -39,7 +39,6 @@ void Toolchain::InitTasks(){
       VortexMaker::CallModuleEvent(args, "StartTaskProcessor", "vortex.modules.builtin.tasks");
 
     }
-
     {
       std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
       args->add("pool_name", this->pool_name);
@@ -463,7 +462,8 @@ void Toolchain::RefreshSnapshots()
 {
   // Create snapshot folder
   VxContext *ctx = VortexMaker::GetCurrentContext();
-  std::string envPath = ctx->projectPath / ctx->paths.toolchainDistFolder;
+  std::string envPath = ctx->projectPath.c_str();
+  envPath += "/.vx/dist/toolchains/";
   std::string baseDir = envPath + "/" + this->name;
   std::string snapshotsDir = baseDir + "/" + "snapshots";
   if (mkdir(snapshotsDir.c_str(), 0777) == -1)
@@ -510,7 +510,7 @@ void Toolchain::RefreshDistConfig()
   VxContext *ctx = VortexMaker::GetCurrentContext();
 
   std::string distPath = ctx->projectPath;
-  distPath += "/" + ctx->paths.toolchainDistFolder + "/" + this->name + "/toolchain.dist.config";
+  distPath += "/.vx/dist/toolchains/" + this->name + "/toolchain.dist.config";
 
   nlohmann::json toolchainData = VortexMaker::DumpJSON(distPath);
 
