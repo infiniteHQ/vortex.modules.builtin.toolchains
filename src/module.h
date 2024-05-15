@@ -14,6 +14,10 @@
 #include <Vortex/modules/vortex.modules.builtin.packages.1.1.0/src/module.h>
 #include <Vortex/modules/vortex.modules.builtin.packages.1.1.0/src/instances/packageInstance/PackageRenderInstance.h>
 
+// FUTURE : #include <Vortex/1.1/main/include/vortex.h>
+// When we run "vortex" this will run /usr/local/bin/Vortex/1.1/vortex
+/// So we can scan selected version of a project and run it if the project version is installed
+
 #include <Vortex/main/include/vortex.h>
 #include <Vortex/main/include/vortex_internals.h>
 #include <Vortex/tools/editor/app/include/editor.h>
@@ -37,8 +41,53 @@ extern TOOLCHAIN_MODULE_API ToolchainsModuleCTX *CToolchainModule; // Current im
 #endif
 
 namespace ToolchainModule{
-    TOOLCHAIN_MODULE_API void InitTasks();
+    //TOOLCHAIN_MODULE_API void InitTasks();
     TOOLCHAIN_MODULE_API bool RegisterNewToolchain(std::shared_ptr<Toolchain> toolchain, nlohmann::json toolchainData);
+
+
+    // Toolchain Current System "TCS" functions.
+    TOOLCHAIN_MODULE_API void CreateTCSTask(std::string tasktype, std::string component, std::string uniqueID, int priority, std::shared_ptr<hArgs> props);
+    TOOLCHAIN_MODULE_API void PushTCSPackageReport(PackageReport report);
+    TOOLCHAIN_MODULE_API void PushTCSSize(std::string newsize);
+    TOOLCHAIN_MODULE_API void PopulateTCS(nlohmann::json jsonData); // from working_host.config
+    TOOLCHAIN_MODULE_API nlohmann::json ExtractTCS();
+    TOOLCHAIN_MODULE_API void SaveTCS(std::shared_ptr<Toolchain> toolchain);
+    TOOLCHAIN_MODULE_API void PutTCSVariable(Task* task, std::string name, std::string createdBy, std::string value);
+    TOOLCHAIN_MODULE_API std::tuple<std::string, std::string, std::string> GetTCSVariable(Task* task, std::string name);
+
+    TOOLCHAIN_MODULE_API std::pair<std::string, int> exec_cmd(const std::string &cmd);
+    TOOLCHAIN_MODULE_API std::pair<std::string, int> exec_cmd_quote(const std::string &cmd);
+
+    // Toolchain main functions.
+    TOOLCHAIN_MODULE_API void PushSave(std::shared_ptr<ToolchainSave> save);
+    TOOLCHAIN_MODULE_API void PushDistSave(std::shared_ptr<VxDistToolchainSave> save);
+    TOOLCHAIN_MODULE_API void CreateTasklist(std::string name, std::shared_ptr<ToolchainSave> save);
+    TOOLCHAIN_MODULE_API void DeleteTasklist(std::string name);
+    TOOLCHAIN_MODULE_API void RegisterTasklist(const std::string label);
+    TOOLCHAIN_MODULE_API void PushDistSave();
+    TOOLCHAIN_MODULE_API void FindTasklists();
+    TOOLCHAIN_MODULE_API void Refresh();
+    TOOLCHAIN_MODULE_API void InitTasks(const std::shared_ptr<hArgs>& args);
+    TOOLCHAIN_MODULE_API void RefreshDistConfig();
+    TOOLCHAIN_MODULE_API void RefreshCurrentWorkingToolchain();
+    TOOLCHAIN_MODULE_API std::string GetTriplet(std::string triplet_type);
+    TOOLCHAIN_MODULE_API bool TaskSuccedded(std::string taskID);
+    TOOLCHAIN_MODULE_API void MakeSnapshot(std::string label);
+    TOOLCHAIN_MODULE_API void MakeDistSnapshot(std::string label);
+    TOOLCHAIN_MODULE_API void RetakeSnapshot(std::string snapshot_label);
+    TOOLCHAIN_MODULE_API void RefreshSnapshots();
+    TOOLCHAIN_MODULE_API void CreateCurrentToolchainSystem();
+    TOOLCHAIN_MODULE_API void DeleteCurrentToolchainSystem();
+    TOOLCHAIN_MODULE_API void DeployNewCurrentSystem();
+    TOOLCHAIN_MODULE_API void DeleteCurrentSystem();
+    TOOLCHAIN_MODULE_API void Init();
+    TOOLCHAIN_MODULE_API void PreBuild();
+    TOOLCHAIN_MODULE_API void Build();
+    TOOLCHAIN_MODULE_API void PostBuild();
+    TOOLCHAIN_MODULE_API void RegisterPackage(const std::string label, const std::string emplacemement);
+    TOOLCHAIN_MODULE_API void FindPackages();
+    TOOLCHAIN_MODULE_API void PreparePackage(std::string packageName);
+    TOOLCHAIN_MODULE_API void CreateToolchainDirectory(/*VxDirectory*/);
 }
 
 

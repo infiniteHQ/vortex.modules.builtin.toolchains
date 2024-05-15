@@ -31,13 +31,15 @@ public:
         CToolchainModule->m_interface = ModuleInterface::GetEditorModuleByName(this->m_name);
 
         // Adding functions
-        // Pouvoir mettre des flags, et autres paramètre pour les fonctions, evenements, etc....
-        this->AddFunction(
-            RegisterToolchains,
-            "RegisterToolchains");
+        this->AddFunction(RegisterToolchains, "RegisterToolchains");
+        this->AddFunction(ToolchainModule::InitTasks, "InitTasks", "That init task registered in a toolchain");
 
+        // Adding input events
+
+        // Adding output events
+
+        // Bootstrapp
         this->ExecFunction("RegisterToolchains");
-        // Adding events
     }
 
     /**

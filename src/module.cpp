@@ -30,6 +30,55 @@ void Toolchain::AddTaskType(const std::string &name)
   CToolchainModule->m_interface->CallInputEvent(args, "AddTaskToPool", "vortex.modules.builtin.tasks");
 }
 
+
+
+TOOLCHAIN_MODULE_API void ToolchainModule::InitTasks(const std::shared_ptr<hArgs> &args)
+{
+  if(args != NULL)
+  {
+    std::shared_ptr<Toolchain> toolchain = args->get<std::shared_ptr<Toolchain>>("toolchain", nullptr);
+    
+    if(toolchain != NULL)
+    {
+      toolchain->pool_name = 'toolchains.' + toolchain->name.c_str();
+
+  if(!taskProcessorCreated)
+  {
+
+  {
+    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+    args->add("processor_name", toolchain->pool_name);
+    CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskProcessor", "vortex.modules.builtin.tasks");
+    CToolchainModule->m_interface->CallInputEvent(args, "StartTaskProcessor", "vortex.modules.builtin.tasks");
+  }
+  {
+    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+    args->add("pool_name", toolchain->pool_name);
+    CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskPool", "vortex.modules.builtin.tasks");
+  }
+  taskProcessorCreated = true;
+  }
+
+  toolchain->AddTaskType<CreateTemporaryUser>("CreateTemporaryUser");
+  toolchain->AddTaskType<DeleteTemporaryUser>("DeleteTemporaryUser");
+  toolchain->AddTaskType<CreateBuildEnv>("CreateBuildEnv");
+  toolchain->AddTaskType<GiveToolchainToTemporaryUser>("GiveToolchainToTemporaryUser");
+  toolchain->AddTaskType<MovePackageToDist>("MovePackageToDist");
+  toolchain->AddTaskType<UncompressDistPackage>("UncompressDistPackage");
+  toolchain->AddTaskType<ConfigurePackage>("ConfigurePackage");
+  toolchain->AddTaskType<CompilePackage>("CompilePackage");
+  toolchain->AddTaskType<InstallPackage>("InstallPackage");
+  toolchain->AddTaskType<SetupDistEnvironment>("SetupDistEnvironment");
+  toolchain->AddTaskType<CheckCompiler>("CheckCompiler");
+  toolchain->AddTaskType<ExecuteTasklist>("ExecuteTasklist");
+    }
+    else
+    {
+      CToolchainModule->m_interface->LogError("FFF");
+    }
+  }
+}
+
 void Toolchain::InitTasks()
 {
 
@@ -807,7 +856,12 @@ std::cout << "f" << std::endl;
     this->registeredPackages = args->get<std::vector<std::shared_ptr<PackageInterface>>>("list", this->registeredPackages);
   }
 std::cout << "f" << std::endl;
-  this->InitTasks();
+  //this->InitTasks();
+  {
+    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+    args->add<std::shared_ptr<Toolchain>>("toolchain", std::make_shared<Toolchain>(*this));
+    CToolchainModule->m_interface->ExecFunction("InitTasks", args);
+  }
 
   CToolchainModule->m_interface->LogInfo("Refreshing tasklists asset of " + this->name);
 
