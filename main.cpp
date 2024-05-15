@@ -46,8 +46,23 @@ public:
     void render() override
     {
 
-        ImGui::Begin("Toolchains");
+        ImGui::Begin("Toolchains", NULL, ImGuiWindowFlags_MenuBar);
         static ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+
+    if (ImGui::BeginMenuBar())
+    {
+        if(ImGui::Button("Create")){
+
+        }
+        if(ImGui::Button("Import")){
+            
+        }
+        ImGui::Separator();
+        if(ImGui::Button("Configuration")){
+            
+        }
+        ImGui::EndMenuBar();
+    }
 
         if (ImGui::BeginTable("table_", 3, flags))
         {

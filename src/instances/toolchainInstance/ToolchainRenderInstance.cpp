@@ -5,17 +5,15 @@ using namespace VortexMaker;
 
 ToolchainRenderInstance::ToolchainRenderInstance(VxContext *ctx, std::shared_ptr<Toolchain> _toolchain)
 {
-    std::cout << "LL" << std::endl;
     this->m_ctx = ctx;
     this->toolchain = _toolchain;
-    std::cout << "LL" << std::endl;
 
     this->Refresh();
-    std::cout << "LL" << std::endl;
+    std::cout << "D9" << std::endl;
     this->toolchain->RefreshCurrentWorkingToolchain();
-    std::cout << "LL" << std::endl;
+    std::cout << "D8" << std::endl;
     this->toolchain->RefreshSnapshots();
-    std::cout << "LL" << std::endl;
+    std::cout << "D7" << std::endl;
 
     {
         uint32_t w, h;
@@ -410,8 +408,11 @@ void ToolchainRenderInstance::Refresh()
     // TODO: BEFORE ALL, REFRESH API INSTANCE OF THIS HOST
 
     VortexMaker::LogInfo("Core", "Start refreshing " + this->name);
+    std::cout << "D" << std::endl;
     this->toolchain->Refresh();
+    std::cout << "D*" << std::endl;
     this->toolchain->RefreshDistConfig();
+    std::cout << "D**" << std::endl;
     // Refresh dist
 
     std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
@@ -432,7 +433,7 @@ void ToolchainRenderInstance::Refresh()
     VortexMaker::LogInfo("Core", "Load a new save " + this->name);
     std::shared_ptr<ToolchainSave> refreshedCurrentSave = std::make_shared<ToolchainSave>();
     std::shared_ptr<VxDistToolchainSave> refreshedCurrentDistSave = std::make_shared<VxDistToolchainSave>();
-
+    
     strncpy(refreshedCurrentSave->name, this->toolchain->name.c_str(), sizeof(refreshedCurrentSave->name));
     refreshedCurrentSave->name[sizeof(refreshedCurrentSave->name) - 1] = '\0';
 
@@ -502,9 +503,6 @@ void ToolchainRenderInstance::Refresh()
     strncpy(refreshedCurrentSave->localScriptsPath, this->toolchain->localScriptsPath.c_str(), sizeof(refreshedCurrentSave->localScriptsPath));
     refreshedCurrentSave->localScriptsPath[sizeof(refreshedCurrentSave->localScriptsPath) - 1] = '\0';
 
-    strncpy(refreshedCurrentSave->localPatchsPath, this->toolchain->localPatchsPath.c_str(), sizeof(refreshedCurrentSave->localPatchsPath));
-    refreshedCurrentSave->localPatchsPath[sizeof(refreshedCurrentSave->localPatchsPath) - 1] = '\0';
-
     strncpy(refreshedCurrentSave->localPackagePath, this->toolchain->localPackagesPath.c_str(), sizeof(refreshedCurrentSave->localPackagePath));
     refreshedCurrentSave->localPackagePath[sizeof(refreshedCurrentSave->localPackagePath) - 1] = '\0';
 
@@ -532,7 +530,7 @@ void ToolchainRenderInstance::Refresh()
 
             refreshedCurrentSave->registeredTasklists.push_back(tasklist);
         }   
-
+        
     strncpy(refreshedCurrentDistSave->AR_value, this->toolchain->distToolchain.AR.c_str(), sizeof(refreshedCurrentDistSave->AR_value));
     refreshedCurrentDistSave->AR_value[sizeof(refreshedCurrentDistSave->AR_value) - 1] = '\0';
 

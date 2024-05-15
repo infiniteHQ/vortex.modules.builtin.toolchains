@@ -133,8 +133,10 @@ struct Toolchain
 
     const char* pool_name = "unknow";
 
+
     // Low level toolchain informations
     std::string workingPath = "not specified";
+    std::string distPath = "not specified";
     std::string ouputPath = "not specified";
     std::string toolchainSourcePath = "not specified";
     bool useWorkingPath = false;

@@ -16,49 +16,54 @@
 #include "tasks/ExecuteTasklist.h"
 
 
-template<typename T>
-void Toolchain::AddTaskType(const std::string& name){
-    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-    args->add<std::vector<std::shared_ptr<Task>>*>("taskarray", &this->tasks);
-    std::shared_ptr<T> task = std::make_shared<T>();
-    args->add<const char*>("pool_name", this->pool_name);
-    args->add<std::shared_ptr<Task>>("task", task);
-    task->tasktype = name;
-    VortexMaker::CallModuleEvent(args, "AddTaskToPool", "vortex.modules.builtin.tasks");
+static bool taskProcessorCreated = false;
 
+template <typename T>
+void Toolchain::AddTaskType(const std::string &name)
+{
+  std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+  args->add<std::vector<std::shared_ptr<Task>> *>("taskarray", &this->tasks);
+  std::shared_ptr<T> task = std::make_shared<T>();
+  args->add<const char *>("pool_name", this->pool_name);
+  args->add<std::shared_ptr<Task>>("task", task);
+  task->tasktype = name;
+  CToolchainModule->m_interface->CallInputEvent(args, "AddTaskToPool", "vortex.modules.builtin.tasks");
 }
 
-void Toolchain::InitTasks(){
+void Toolchain::InitTasks()
+{
 
-    this->pool_name = 'toolchains.' + this->name.c_str();
+  this->pool_name = 'toolchains.' + this->name.c_str();
 
-    {
-      std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-      args->add("processor_name", this->pool_name);
-      VortexMaker::CallModuleEvent(args, "CreateTaskProcessor", "vortex.modules.builtin.tasks");
-      VortexMaker::CallModuleEvent(args, "StartTaskProcessor", "vortex.modules.builtin.tasks");
+  if(!taskProcessorCreated)
+  {
 
-    }
-    {
-      std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-      args->add("pool_name", this->pool_name);
-      VortexMaker::CallModuleEvent(args, "CreateTaskPool", "vortex.modules.builtin.tasks");
+  {
+    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+    args->add("processor_name", this->pool_name);
+    CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskProcessor", "vortex.modules.builtin.tasks");
+    CToolchainModule->m_interface->CallInputEvent(args, "StartTaskProcessor", "vortex.modules.builtin.tasks");
+  }
+  {
+    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+    args->add("pool_name", this->pool_name);
+    CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskPool", "vortex.modules.builtin.tasks");
+  }
+  taskProcessorCreated = true;
+  }
 
-    }
-
-    this->AddTaskType<CreateTemporaryUser>("CreateTemporaryUser");
-    this->AddTaskType<DeleteTemporaryUser>("DeleteTemporaryUser");
-    this->AddTaskType<CreateBuildEnv>("CreateBuildEnv");
-    this->AddTaskType<GiveToolchainToTemporaryUser>("GiveToolchainToTemporaryUser");
-    this->AddTaskType<MovePackageToDist>("MovePackageToDist");
-    this->AddTaskType<UncompressDistPackage>("UncompressDistPackage");
-    this->AddTaskType<ConfigurePackage>("ConfigurePackage");
-    this->AddTaskType<CompilePackage>("CompilePackage");
-    this->AddTaskType<InstallPackage>("InstallPackage");
-    this->AddTaskType<SetupDistEnvironment>("SetupDistEnvironment");
-    this->AddTaskType<CheckCompiler>("CheckCompiler");
-    this->AddTaskType<ExecuteTasklist>("ExecuteTasklist");
-
+  this->AddTaskType<CreateTemporaryUser>("CreateTemporaryUser");
+  this->AddTaskType<DeleteTemporaryUser>("DeleteTemporaryUser");
+  this->AddTaskType<CreateBuildEnv>("CreateBuildEnv");
+  this->AddTaskType<GiveToolchainToTemporaryUser>("GiveToolchainToTemporaryUser");
+  this->AddTaskType<MovePackageToDist>("MovePackageToDist");
+  this->AddTaskType<UncompressDistPackage>("UncompressDistPackage");
+  this->AddTaskType<ConfigurePackage>("ConfigurePackage");
+  this->AddTaskType<CompilePackage>("CompilePackage");
+  this->AddTaskType<InstallPackage>("InstallPackage");
+  this->AddTaskType<SetupDistEnvironment>("SetupDistEnvironment");
+  this->AddTaskType<CheckCompiler>("CheckCompiler");
+  this->AddTaskType<ExecuteTasklist>("ExecuteTasklist");
 }
 
 static std::chrono::time_point<std::chrono::system_clock> stringToTimePoint(const std::string &timeString)
@@ -180,6 +185,7 @@ void ToolchainCurrentSystem::Populate(nlohmann::json jsonData)
   {
     std::shared_ptr<Task> task = std::make_shared<Task>();
 
+    std::cout << "D88" << std::endl;
     task->id = packageReport["t_id"].get<std::string>();
     task->tasktype = packageReport["t_tasktype"].get<std::string>();
     task->priority = packageReport["t_priority"].get<int>();
@@ -258,13 +264,18 @@ void ToolchainCurrentSystem::Populate(nlohmann::json jsonData)
 
 // Task succeded = last task
 // Plutot le faire dans le current system
-bool Toolchain::TaskSuccedded(std::string label){
-  for(auto succededTask : this->currentLoadedSystem.executedTasks){
-    if(succededTask->tasktype == label){
-      if(succededTask->state == "success"){
+bool Toolchain::TaskSuccedded(std::string label)
+{
+  for (auto succededTask : this->currentLoadedSystem.executedTasks)
+  {
+    if (succededTask->tasktype == label)
+    {
+      if (succededTask->state == "success")
+      {
         return true;
       }
-      else{
+      else
+      {
         return false;
       }
     }
@@ -292,42 +303,41 @@ std::string Toolchain::GetTriplet(std::string triplet_type)
   if (triplet_type == "target")
   {
 
-   
-      std::string triplet;
+    std::string triplet;
 
-      triplet += this->target_arch;
-      triplet += "-";
-      triplet += this->target_vendor;
-      triplet += "-";
-      triplet += this->target_platform;
+    triplet += this->target_arch;
+    triplet += "-";
+    triplet += this->target_vendor;
+    triplet += "-";
+    triplet += this->target_platform;
 
-      return triplet;
+    return triplet;
   }
   else if (triplet_type == "builder")
   {
-      std::string triplet;
+    std::string triplet;
 
-      triplet += this->builder_arch;
-      triplet += "-";
-      triplet += this->builder_vendor;
-      triplet += "-";
-      triplet += this->builder_platform;
+    triplet += this->builder_arch;
+    triplet += "-";
+    triplet += this->builder_vendor;
+    triplet += "-";
+    triplet += this->builder_platform;
 
-      return triplet;
+    return triplet;
   }
 
   if (triplet_type == "host")
   {
 
-      std::string triplet;
+    std::string triplet;
 
-      triplet += this->host_arch;
-      triplet += "-";
-      triplet += this->host_vendor;
-      triplet += "-";
-      triplet += this->host_platform;
+    triplet += this->host_arch;
+    triplet += "-";
+    triplet += this->host_vendor;
+    triplet += "-";
+    triplet += this->host_platform;
 
-      return triplet;
+    return triplet;
   }
 
   return "unknow";
@@ -335,110 +345,109 @@ std::string Toolchain::GetTriplet(std::string triplet_type)
 
 void Toolchain::MakeSnapshot(std::string label)
 {
-    // Create snapshot folder
-    VxContext *ctx = VortexMaker::GetCurrentContext();
-    std::string envPath = ctx->projectPath / ctx->paths.toolchainDistFolder;
-    std::string baseDir = envPath + "/" + this->name;
-    std::string snapshotsDir = baseDir + "/" + "snapshots";
+  // Create snapshot folder
+  VxContext *ctx = VortexMaker::GetCurrentContext();
+  std::string envPath = ctx->projectPath / ctx->paths.toolchainDistFolder;
+  std::string baseDir = envPath + "/" + this->name;
+  std::string snapshotsDir = baseDir + "/" + "snapshots";
 
-    this->RefreshSnapshots();
-    for (auto snapshot : this->snapshots)
+  this->RefreshSnapshots();
+  for (auto snapshot : this->snapshots)
+  {
+    if (snapshot.name == label)
     {
-        if (snapshot.name == label)
+      VortexMaker::LogError("Core", "Snapshot with label " + label + " already exists.");
+
+      // détecter si le dernier charactere de label est un nombre, si oui ajouter +1 sinon ajouter _1 a la fin
+      std::string lastChar = label.substr(label.size() - 1);
+      int number = 1;
+
+      bool flag = true; // We initialise flag as true.
+      for (int i = 0; i < lastChar.length(); i++)
+      {
+        if (isdigit(lastChar[i]) == false)
         {
-            VortexMaker::LogError("Core", "Snapshot with label " + label + " already exists.");
-
-            // détecter si le dernier charactere de label est un nombre, si oui ajouter +1 sinon ajouter _1 a la fin
-            std::string lastChar = label.substr(label.size() - 1);
-            int number = 1;
-
-            bool flag = true; // We initialise flag as true.
-            for (int i = 0; i < lastChar.length(); i++)
-            {
-                if (isdigit(lastChar[i]) == false)
-                {
-                    flag = false;
-                    number = isdigit(lastChar[i]);
-                    break;
-                }
-            }
-
-            if (flag == true)
-            { // It means that the previous for loop found each character to be a digit.
-                label.pop_back();
-                number++;
-                label += std::to_string(number);
-            }
-            else
-            {
-                label += "-1";
-            }
+          flag = false;
+          number = isdigit(lastChar[i]);
+          break;
         }
+      }
+
+      if (flag == true)
+      { // It means that the previous for loop found each character to be a digit.
+        label.pop_back();
+        number++;
+        label += std::to_string(number);
+      }
+      else
+      {
+        label += "-1";
+      }
     }
+  }
 
+  if (mkdir(snapshotsDir.c_str(), 0777) == -1)
+  {
+    perror("Error while creating folder");
+  }
 
-    if (mkdir(snapshotsDir.c_str(), 0777) == -1)
-    {
-        perror("Error while creating folder");
-    }
+  this->path_hostsnapshots = snapshotsDir;
 
-    this->path_hostsnapshots = snapshotsDir;
+  std::string path = this->path_hostsnapshots + "/" + label;
+  std::string SnapshotFolderCreation = "sudo mkdir " + path;
+  system(SnapshotFolderCreation.c_str());
 
-    std::string path = this->path_hostsnapshots + "/" + label;
-    std::string SnapshotFolderCreation = "sudo mkdir " + path;
-    system(SnapshotFolderCreation.c_str());
+  // Create base snapshot config file
+  nlohmann::json distToolchainJson;
+  distToolchainJson["snapshot"]["name"] = label;
+  std::ofstream outputFile(path + "/snapshot.config");
 
-    // Create base snapshot config file
-    nlohmann::json distToolchainJson;
-    distToolchainJson["snapshot"]["name"] = label;
-    std::ofstream outputFile(path + "/snapshot.config");
+  if (outputFile.is_open())
+  {
+    outputFile << std::setw(4) << distToolchainJson << std::endl;
+    outputFile.close();
+  }
+  else
+  {
+    std::cerr << "Error while creating the toolchain dist config file." << std::endl;
+  }
 
-    if (outputFile.is_open())
-    {
-        outputFile << std::setw(4) << distToolchainJson << std::endl;
-        outputFile.close();
-    }
-    else
-    {
-        std::cerr << "Error while creating the toolchain dist config file." << std::endl;
-    }
+  // Compress current working_host into snapshot folder
+  std::string CopyConfig = "sudo cp " + this->workingPath + "/working_host.config " + path;
+  system(CopyConfig.c_str());
 
-    // Compress current working_host into snapshot folder
-    std::string CopyConfig = "sudo cp " + this->workingPath + "/working_host.config " + path;
-    system(CopyConfig.c_str());
-
-    std::string Compress = " cd " + this->workingPath + "/../ && sudo tar -czvf " + path + "/working_host.tar.gz working_host";
-    system(Compress.c_str());
+  std::string Compress = " cd " + this->workingPath + "/../ && sudo tar -czvf " + path + "/working_host.tar.gz working_host";
+  system(Compress.c_str());
 }
 
 void Toolchain::RetakeSnapshot(std::string snapshot_label)
 {
-    VxContext *ctx = VortexMaker::GetCurrentContext();
-    std::string envPath = ctx->projectPath / ctx->paths.toolchainDistFolder;
-    std::string baseDir = envPath + "/" + this->name;
-    std::string snapshotsDir = baseDir + "/" + this->GetTriplet("target");
+  VxContext *ctx = VortexMaker::GetCurrentContext();
+  std::string envPath = ctx->projectPath / ctx->paths.toolchainDistFolder;
+  std::string baseDir = envPath + "/" + this->name;
+  std::string snapshotsDir = baseDir + "/" + this->GetTriplet("target");
 
-    this->DeleteCurrentToolchainSystem();
+  this->DeleteCurrentToolchainSystem();
 
-    // Recréer un dossier workingPaht
-    std::string CreateWorkingHost = "sudo mkdir " + this->workingPath;
-    system(CreateWorkingHost.c_str());
+  // Recréer un dossier workingPaht
+  std::string CreateWorkingHost = "sudo mkdir " + this->workingPath;
+  system(CreateWorkingHost.c_str());
 
-    // Find snapshot by label
-    for (auto snapshot : this->snapshots)
+  // Find snapshot by label
+  for (auto snapshot : this->snapshots)
+  {
+    if (snapshot.name == snapshot_label)
     {
-        if (snapshot.name == snapshot_label)
-        {
-            // Decompresser le tarball présent dans snapshot.path et le mettre dans workingPath
-            std::string Decompress = " cd " + snapshot.path + " && sudo tar -xzvf " + "working_host.tar.gz -C " + this->workingPath + "/../";
-            system(Decompress.c_str());
-        }
+      // Decompresser le tarball présent dans snapshot.path et le mettre dans workingPath
+      std::string Decompress = " cd " + snapshot.path + " && sudo tar -xzvf " + "working_host.tar.gz -C " + this->workingPath + "/../";
+      system(Decompress.c_str());
     }
+  }
 
-    this->RefreshCurrentWorkingToolchain();
+  this->RefreshCurrentWorkingToolchain();
 
-    // Uncompress working_host tarball into main host folder
-    // Set working host instance into current working host (refresh)
+  // Uncompress working_host tarball into main host folder
+  // Set working host instance into current working host (refresh)
 }
 
 void Toolchain::RefreshCurrentWorkingToolchain()
@@ -462,16 +471,11 @@ void Toolchain::RefreshSnapshots()
 {
   // Create snapshot folder
   VxContext *ctx = VortexMaker::GetCurrentContext();
-  std::string envPath = ctx->projectPath.c_str();
-  envPath += "/.vx/dist/toolchains/";
-  std::string baseDir = envPath + "/" + this->name;
-  std::string snapshotsDir = baseDir + "/" + "snapshots";
-  if (mkdir(snapshotsDir.c_str(), 0777) == -1)
+  this->path_hostsnapshots = this->distPath + "/" + "snapshots";
+  if (mkdir(this->path_hostsnapshots.c_str(), 0777) == -1)
   {
     perror("Error while creating folder");
   }
-
-  this->path_hostsnapshots = snapshotsDir;
 
   this->snapshots.clear();
   // Dist Toolchains
@@ -506,14 +510,9 @@ void Toolchain::RefreshSnapshots()
 
 void Toolchain::RefreshDistConfig()
 {
-
   VxContext *ctx = VortexMaker::GetCurrentContext();
-
-  std::string distPath = ctx->projectPath;
-  distPath += "/.vx/dist/toolchains/" + this->name + "/toolchain.dist.config";
-
+  std::string distPath = this->distPath + "/toolchain.dist.config";
   nlohmann::json toolchainData = VortexMaker::DumpJSON(distPath);
-
   this->distToolchain.AR = toolchainData["configs"]["AR"].get<std::string>();
   this->distToolchain.AS = toolchainData["configs"]["AS"].get<std::string>();
   this->distToolchain.CC = toolchainData["configs"]["CC"].get<std::string>();
@@ -523,19 +522,19 @@ void Toolchain::RefreshDistConfig()
   this->distToolchain.STRIP = toolchainData["configs"]["STRIP"].get<std::string>();
 }
 
-
 void Toolchain::DeleteCurrentToolchainSystem()
 {
   // Delete working_host directory and recreate a new one
   std::string DeleteWorkingHost = "sudo rm -rf " + this->workingPath;
   ToolchainCurrentSystem newCurrentSystem; // To erase
   this->currentLoadedSystem = newCurrentSystem;
-  
+
   system(DeleteWorkingHost.c_str());
 }
 
 void Toolchain::CreateCurrentToolchainSystem()
 {
+  
   this->DeleteCurrentToolchainSystem();
   // Recréer un dossier workingPaht
   std::string CreateWorkingHost = "sudo mkdir " + this->workingPath;
@@ -563,8 +562,8 @@ void Toolchain::CreateCurrentToolchainSystem()
   this->haveCurrentSys = true;
 }
 
-
-std::pair<std::string, int> Toolchain::exec_cmd_quote(const std::string& cmd) {
+std::pair<std::string, int> Toolchain::exec_cmd_quote(const std::string &cmd)
+{
   VxContext *ctx = VortexMaker::GetCurrentContext();
 
   std::string output;
@@ -578,36 +577,34 @@ std::pair<std::string, int> Toolchain::exec_cmd_quote(const std::string& cmd) {
   _cmd += "/.vx/temp/" + uid + ".txt";
   _cmd += "";
 
-      std::string path = ctx->projectPath;
-      path += "/.vx/temp/"+uid+".txt";
+  std::string path = ctx->projectPath;
+  path += "/.vx/temp/" + uid + ".txt";
 
-      returnCode = system((char *)_cmd.c_str());
+  returnCode = system((char *)_cmd.c_str());
 
-      std::ifstream outputFile(path);
-      output.clear();
+  std::ifstream outputFile(path);
+  output.clear();
 
-        if (outputFile.is_open())
-        {
-          output.assign(std::istreambuf_iterator<char>(outputFile), std::istreambuf_iterator<char>());
-          outputFile.close();
-          std::string clearFile = "rm ";
-          clearFile +=  ctx->projectPath;
-          clearFile += "/.vx/temp/" + uid + ".txt";
+  if (outputFile.is_open())
+  {
+    output.assign(std::istreambuf_iterator<char>(outputFile), std::istreambuf_iterator<char>());
+    outputFile.close();
+    std::string clearFile = "rm ";
+    clearFile += ctx->projectPath;
+    clearFile += "/.vx/temp/" + uid + ".txt";
 
-
-          system((char *)clearFile.c_str());
-        }
-        else
-        {
-          std::cerr << "Impossible d'ouvrir le fichier de sortie d'erreur." << std::endl;
-          return{"Unknow log(s)", returnCode};
-        
-      }
-      return{output, returnCode};
+    system((char *)clearFile.c_str());
+  }
+  else
+  {
+    std::cerr << "Impossible d'ouvrir le fichier de sortie d'erreur." << std::endl;
+    return {"Unknow log(s)", returnCode};
+  }
+  return {output, returnCode};
 }
 
-
-std::pair<std::string, int> Toolchain::exec_cmd(const std::string& cmd) {
+std::pair<std::string, int> Toolchain::exec_cmd(const std::string &cmd)
+{
   VxContext *ctx = VortexMaker::GetCurrentContext();
 
   std::string output;
@@ -620,32 +617,30 @@ std::pair<std::string, int> Toolchain::exec_cmd(const std::string& cmd) {
   _cmd += ctx->projectPath;
   _cmd += "/.vx/temp/" + uid + ".txt";
 
-      std::string path = ctx->projectPath;
-      path += "/.vx/temp/"+uid+".txt";
+  std::string path = ctx->projectPath;
+  path += "/.vx/temp/" + uid + ".txt";
 
-      returnCode = system((char *)_cmd.c_str());
+  returnCode = system((char *)_cmd.c_str());
 
-      std::ifstream outputFile(path);
-      output.clear();
+  std::ifstream outputFile(path);
+  output.clear();
 
-        if (outputFile.is_open())
-        {
-          output.assign(std::istreambuf_iterator<char>(outputFile), std::istreambuf_iterator<char>());
-          outputFile.close();
-          std::string clearFile = "rm ";
-          clearFile +=  ctx->projectPath;
-          clearFile += "/.vx/temp/" + uid + ".txt";
+  if (outputFile.is_open())
+  {
+    output.assign(std::istreambuf_iterator<char>(outputFile), std::istreambuf_iterator<char>());
+    outputFile.close();
+    std::string clearFile = "rm ";
+    clearFile += ctx->projectPath;
+    clearFile += "/.vx/temp/" + uid + ".txt";
 
-
-          system((char *)clearFile.c_str());
-        }
-        else
-        {
-          std::cerr << "Impossible d'ouvrir le fichier de sortie d'erreur." << std::endl;
-          return{"null", returnCode};
-        
-      }
-      return{output, returnCode};
+    system((char *)clearFile.c_str());
+  }
+  else
+  {
+    std::cerr << "Impossible d'ouvrir le fichier de sortie d'erreur." << std::endl;
+    return {"null", returnCode};
+  }
+  return {output, returnCode};
 }
 
 void Toolchain::RegisterTasklist(const std::string label)
@@ -689,11 +684,11 @@ void Toolchain::FindTasklists()
           {
             std::shared_ptr<TaskList> newTasklist = std::make_shared<TaskList>();
 
-              newTasklist->configFilePath = file;
+            newTasklist->configFilePath = file;
 
             newTasklist->label = filecontent["label"].get<std::string>();
 
-            //this->tasks.clear();
+            // this->tasks.clear();
             nlohmann::json tasks = filecontent["tasks"];
             for (auto &t : tasks)
             {
@@ -701,7 +696,8 @@ void Toolchain::FindTasklists()
               task->tasktype = t["task"].get<std::string>();
               task->component = t["component"].get<std::string>();
 
-              for(auto env_props : t["env_props"]){
+              for (auto env_props : t["env_props"])
+              {
                 task->env_props.push_back({env_props["type"].get<std::string>(), env_props["prop"].get<std::string>()});
               }
 
@@ -734,7 +730,6 @@ void Toolchain::FindTasklists()
     }
   }
 }
-
 
 void Toolchain::Refresh()
 {
@@ -769,14 +764,21 @@ void Toolchain::Refresh()
   this->host_fpu = toolchainData["configs"]["host_fpu"].get<std::string>();
 
   this->toolchain_type = toolchainData["configs"]["toolchain_type"].get<std::string>();
-
   this->compressionMode = toolchainData["configs"]["compression"].get<std::string>();
 
+  std::cout << toolchainData["data"]["packages"].get<std::string>() << std::endl;
   CToolchainModule->m_interface->LogInfo("Getting toolchain \"data\" informations from " + this->configFilePath);
-  this->localPackagesPath = toolchainData["data"]["packages"].get<std::string>();
-  this->localPatchsPath = toolchainData["data"]["patchs"].get<std::string>();
-  this->localScriptsPath = toolchainData["data"]["scripts"].get<std::string>();
+  std::cout << toolchainData["data"]["packages"].get<std::string>() << std::endl;
 
+  if (toolchainData["data"].contains("packages") && toolchainData["data"]["packages"].is_string())
+  {
+    this->localPackagesPath = toolchainData["data"]["packages"].get<std::string>();
+  }
+
+  if (toolchainData["data"].contains("scripts") && toolchainData["data"]["scripts"].is_string())
+  {
+    this->localScriptsPath = toolchainData["data"]["scripts"].get<std::string>();
+  }
   CToolchainModule->m_interface->LogInfo("Refreshing packages asset of " + this->name);
   registeredPackages.clear();
   nlohmann::json packages = toolchainData["content"]["packages"];
@@ -792,18 +794,19 @@ void Toolchain::Refresh()
 
   CToolchainModule->m_interface->LogInfo("Finding packages asset of " + this->name);
 
-  // this->FindPackages();
+std::cout << "f" << std::endl;
+ // this->FindPackages();
   {
     std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
     args->add("packages", this->packages);
     args->add("list", this->registeredPackages);
 
-    VortexMaker::CallModuleEvent(args, "FindPackages", "vortex.modules.builtin.packages");
+    CToolchainModule->m_interface->CallInputEvent(args, "FindPackages", "vortex.modules.builtin.packages");
 
     this->packages = args->get<std::vector<std::shared_ptr<Package>>>("packages", this->packages);
     this->registeredPackages = args->get<std::vector<std::shared_ptr<PackageInterface>>>("list", this->registeredPackages);
   }
-
+std::cout << "f" << std::endl;
   this->InitTasks();
 
   CToolchainModule->m_interface->LogInfo("Refreshing tasklists asset of " + this->name);
@@ -812,7 +815,7 @@ void Toolchain::Refresh()
   nlohmann::json tasklists = toolchainData["content"]["tasklists"];
   for (auto &t : tasklists)
   {
-     this->RegisterTasklist(t["label"].get<std::string>());
+    this->RegisterTasklist(t["label"].get<std::string>());
   }
   CToolchainModule->m_interface->LogInfo("Finding tasklists asset of " + this->name);
   this->FindTasklists();
@@ -828,16 +831,14 @@ void ToolchainCurrentSystem::Save(std::shared_ptr<Toolchain> parent)
   if (file.is_open())
   {
     file << std::setw(4) << data << std::endl;
-  CToolchainModule->m_interface->LogInfo("Object saved to " + parent->workingPath + "/working_host.config");
+    CToolchainModule->m_interface->LogInfo("Object saved to " + parent->workingPath + "/working_host.config");
     file.close();
   }
   else
   {
-  CToolchainModule->m_interface->LogInfo("Unable to open file " + parent->workingPath + "/working_host.config" + " for writing!");
+    CToolchainModule->m_interface->LogInfo("Unable to open file " + parent->workingPath + "/working_host.config" + " for writing!");
   }
 }
-
-
 
 void Toolchain::PushSave(std::shared_ptr<ToolchainSave> save)
 {
@@ -925,8 +926,7 @@ void Toolchain::PushDistSave(std::shared_ptr<VxDistToolchainSave> save)
   toolchainData["configs"]["RANLIB"] = save->RANLIB_value;
   toolchainData["configs"]["STRIP"] = save->STRIP_value;
 
-  std::string distPath = ctx->projectPath;
-  distPath += "/" + ctx->paths.toolchainDistFolder + "/" + this->name + "/toolchain.dist.config";
+  std::string distPath = this->distPath + "/toolchain.dist.config";
 
   std::ofstream file(distPath);
   if (file.is_open())
@@ -952,9 +952,20 @@ void Toolchain::Init()
   // Load all custom tasks from plugins
 
   // Get dist working path (for CurrentWorkingToolchain)
-  std::string envPath = ctx.projectPath / ctx.paths.toolchainDistFolder;
-  std::string baseDir = envPath + "/" + this->name;
-  std::string crosstoolsDir = baseDir + "/working_host";
+
+  std::string dataDistPath = CToolchainModule->m_interface->m_datapath + "/data/" + this->name + "/dist/";
+  this->distPath = dataDistPath;
+
+  std::string crosstoolsDir = this->distPath + "/working_host";
+
+  VortexMaker::createFolderIfNotExists(distPath);
+  VortexMaker::createFolderIfNotExists(this->distPath + "/data");
+  VortexMaker::createFolderIfNotExists(this->distPath + "/data/packages");
+  VortexMaker::createFolderIfNotExists(this->distPath + "/data/patchs");
+  VortexMaker::createFolderIfNotExists(this->distPath + "/data/scripts");
+  VortexMaker::createFolderIfNotExists(this->distPath + "/snapshots");
+  VortexMaker::createFolderIfNotExists(this->distPath + "/working_host");
+
   this->workingPath = crosstoolsDir;
 
   // this->taskProcessor = std::make_shared<TaskProcessor>();
@@ -1004,18 +1015,16 @@ TOOLCHAIN_MODULE_API bool ToolchainModule::RegisterNewToolchain(std::shared_ptr<
   // this->FindPackages();
 
   {
-  CToolchainModule->m_interface->LogInfo("Finding packages asset of " + toolchain->name);
+    CToolchainModule->m_interface->LogInfo("Finding packages asset of " + toolchain->name);
     std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
     args->add("packages", toolchain->packages);
     args->add("list", toolchain->registeredPackages);
 
-    VortexMaker::CallModuleEvent(args, "FindPackages", "vortex.modules.builtin.packages");
+    CToolchainModule->m_interface->CallInputEvent(args, "FindPackages", "vortex.modules.builtin.packages");
 
     toolchain->packages = args->get<std::vector<std::shared_ptr<Package>>>("packages", toolchain->packages);
     toolchain->registeredPackages = args->get<std::vector<std::shared_ptr<PackageInterface>>>("list", toolchain->registeredPackages);
   };
-
-
 
   nlohmann::json tasklists = toolchainData["content"]["tasklists"];
   for (auto &tasklist : tasklists)
@@ -1026,7 +1035,7 @@ TOOLCHAIN_MODULE_API bool ToolchainModule::RegisterNewToolchain(std::shared_ptr<
     newtasklistInterface->resolved = false;
     toolchain->registeredTasklists.push_back(newtasklistInterface);
   }
-  
+
   {
     VortexMaker::LogInfo("Core", "Finding tasklists asset of " + toolchain->name);
     std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
@@ -1034,12 +1043,11 @@ TOOLCHAIN_MODULE_API bool ToolchainModule::RegisterNewToolchain(std::shared_ptr<
     args->add("tasklists", toolchain->tasklists);
     args->add("list", toolchain->registeredPackages);
 
-    VortexMaker::CallModuleEvent(args, "FindTasklists", "vortex.modules.builtin.tasklists");
+    CToolchainModule->m_interface->CallInputEvent(args, "FindTasklists", "vortex.modules.builtin.tasklists");
 
     toolchain->tasklists = args->get<std::vector<std::shared_ptr<TaskList>>>("tasklists", toolchain->tasklists);
-    //toolchain->registeredTasklists = args->get<std::vector<std::shared_ptr<TasklistInterface>>>("list", toolchain->registeredTasklists);
+    // toolchain->registeredTasklists = args->get<std::vector<std::shared_ptr<TasklistInterface>>>("list", toolchain->registeredTasklists);
   };
-
 
   toolchain->Init();
 
