@@ -40,18 +40,23 @@ struct ToolchainsModuleCTX
 extern TOOLCHAIN_MODULE_API ToolchainsModuleCTX *CToolchainModule; // Current implicit context pointer
 #endif
 
+
+
 namespace ToolchainModule{
     //TOOLCHAIN_MODULE_API void InitTasks();
     TOOLCHAIN_MODULE_API bool RegisterNewToolchain(std::shared_ptr<Toolchain> toolchain, nlohmann::json toolchainData);
 
+    TOOLCHAIN_MODULE_API void InitTasks(const std::shared_ptr<hArgs>& args);
+    TOOLCHAIN_MODULE_API void Refresh(const std::shared_ptr<hArgs>& args);
+
+    TOOLCHAIN_MODULE_API void SaveTCS(const std::shared_ptr<hArgs> &args);
 
     // Toolchain Current System "TCS" functions.
-    TOOLCHAIN_MODULE_API void CreateTCSTask(std::string tasktype, std::string component, std::string uniqueID, int priority, std::shared_ptr<hArgs> props);
+    TOOLCHAIN_MODULE_API void CreateTCSTask(const std::shared_ptr<hArgs>& args);
     TOOLCHAIN_MODULE_API void PushTCSPackageReport(PackageReport report);
     TOOLCHAIN_MODULE_API void PushTCSSize(std::string newsize);
     TOOLCHAIN_MODULE_API void PopulateTCS(nlohmann::json jsonData); // from working_host.config
     TOOLCHAIN_MODULE_API nlohmann::json ExtractTCS();
-    TOOLCHAIN_MODULE_API void SaveTCS(std::shared_ptr<Toolchain> toolchain);
     TOOLCHAIN_MODULE_API void PutTCSVariable(Task* task, std::string name, std::string createdBy, std::string value);
     TOOLCHAIN_MODULE_API std::tuple<std::string, std::string, std::string> GetTCSVariable(Task* task, std::string name);
 
@@ -66,8 +71,6 @@ namespace ToolchainModule{
     TOOLCHAIN_MODULE_API void RegisterTasklist(const std::string label);
     TOOLCHAIN_MODULE_API void PushDistSave();
     TOOLCHAIN_MODULE_API void FindTasklists();
-    TOOLCHAIN_MODULE_API void Refresh();
-    TOOLCHAIN_MODULE_API void InitTasks(const std::shared_ptr<hArgs>& args);
     TOOLCHAIN_MODULE_API void RefreshDistConfig();
     TOOLCHAIN_MODULE_API void RefreshCurrentWorkingToolchain();
     TOOLCHAIN_MODULE_API std::string GetTriplet(std::string triplet_type);
@@ -297,6 +300,17 @@ void AddTaskType(const std::string& name);
 
 
 
+
+static std::shared_ptr<Toolchain> get_toolchain_by_name(const std::string& name)
+{
+  for(auto toolchain : CToolchainModule->m_toolchains)
+  {
+    if(name == toolchain->name)
+    {
+      return toolchain;
+    }
+  }
+}
 
 
 

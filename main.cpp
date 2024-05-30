@@ -32,7 +32,24 @@ public:
 
         // Adding functions
         this->AddFunction(RegisterToolchains, "RegisterToolchains");
-        this->AddFunction(ToolchainModule::InitTasks, "InitTasks", "That init task registered in a toolchain");
+
+        this->AddFunction(
+            ToolchainModule::InitTasks, 
+            "InitTasks", 
+            "That init task registered in a toolchain", 
+            {
+             {"toolchain", "Toolchain*", "Toolchain where init corresponding tasks"},
+            }, 
+            false);
+
+        this->AddFunction(
+            ToolchainModule::Refresh, 
+            "Refresh", 
+            "Refresh all properties & components of a toolchain", 
+            {
+             {"toolchain", "Toolchain*", "Toolchain to refresh"},
+            }, 
+            false);
 
         // Adding input events
 
@@ -51,20 +68,20 @@ public:
         ImGui::Begin("Toolchains", NULL, ImGuiWindowFlags_MenuBar);
         static ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 
-    if (ImGui::BeginMenuBar())
-    {
-        if(ImGui::Button("Create")){
-
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::Button("Create"))
+            {
+            }
+            if (ImGui::Button("Import"))
+            {
+            }
+            ImGui::Separator();
+            if (ImGui::Button("Configuration"))
+            {
+            }
+            ImGui::EndMenuBar();
         }
-        if(ImGui::Button("Import")){
-            
-        }
-        ImGui::Separator();
-        if(ImGui::Button("Configuration")){
-            
-        }
-        ImGui::EndMenuBar();
-    }
 
         if (ImGui::BeginTable("table_", 3, flags))
         {

@@ -15,7 +15,6 @@
 #include "tasks/UncompressDistPackage.h"
 #include "tasks/ExecuteTasklist.h"
 
-
 static bool taskProcessorCreated = false;
 
 template <typename T>
@@ -30,47 +29,70 @@ void Toolchain::AddTaskType(const std::string &name)
   CToolchainModule->m_interface->CallInputEvent(args, "AddTaskToPool", "vortex.modules.builtin.tasks");
 }
 
+TOOLCHAIN_MODULE_API void ToolchainModule::SaveTCS(const std::shared_ptr<hArgs> &args)
+{
+  if (args != NULL)
+  {
+    std::shared_ptr<Toolchain> toolchain = args->get<std::shared_ptr<Toolchain>>("toolchain", nullptr);
+    std::shared_ptr<ToolchainCurrentSystem> tcs = args->get<std::shared_ptr<ToolchainCurrentSystem>>("tcs", nullptr);
 
+    if (toolchain != NULL && tcs != NULL)
+    {
+      nlohmann::json data = tcs->Extract();
+      std::ofstream file(toolchain->workingPath + "/working_host.config");
+      if (file.is_open())
+      {
+        file << std::setw(4) << data << std::endl;
+        CToolchainModule->m_interface->LogInfo("Object saved to " + toolchain->workingPath + "/working_host.config");
+        file.close();
+      }
+      else
+      {
+        CToolchainModule->m_interface->LogInfo("Unable to open file " + toolchain->workingPath + "/working_host.config" + " for writing!");
+      }
+    }
+  }
+}
 
 TOOLCHAIN_MODULE_API void ToolchainModule::InitTasks(const std::shared_ptr<hArgs> &args)
 {
-  if(args != NULL)
+  if (args != NULL)
   {
     std::shared_ptr<Toolchain> toolchain = args->get<std::shared_ptr<Toolchain>>("toolchain", nullptr);
-    
-    if(toolchain != NULL)
+
+    if (toolchain != NULL)
     {
       toolchain->pool_name = 'toolchains.' + toolchain->name.c_str();
 
-  if(!taskProcessorCreated)
-  {
+      if (!taskProcessorCreated)
+      {
 
-  {
-    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-    args->add("processor_name", toolchain->pool_name);
-    CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskProcessor", "vortex.modules.builtin.tasks");
-    CToolchainModule->m_interface->CallInputEvent(args, "StartTaskProcessor", "vortex.modules.builtin.tasks");
-  }
-  {
-    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-    args->add("pool_name", toolchain->pool_name);
-    CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskPool", "vortex.modules.builtin.tasks");
-  }
-  taskProcessorCreated = true;
-  }
+        {
+          std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+          args->add("processor_name", toolchain->pool_name);
+          CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskProcessor", "vortex.modules.builtin.tasks");
+          CToolchainModule->m_interface->CallInputEvent(args, "StartTaskProcessor", "vortex.modules.builtin.tasks");
+        }
+        {
+          std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+          args->add("pool_name", toolchain->pool_name);
+          CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskPool", "vortex.modules.builtin.tasks");
+        }
+        taskProcessorCreated = true;
+      }
 
-  toolchain->AddTaskType<CreateTemporaryUser>("CreateTemporaryUser");
-  toolchain->AddTaskType<DeleteTemporaryUser>("DeleteTemporaryUser");
-  toolchain->AddTaskType<CreateBuildEnv>("CreateBuildEnv");
-  toolchain->AddTaskType<GiveToolchainToTemporaryUser>("GiveToolchainToTemporaryUser");
-  toolchain->AddTaskType<MovePackageToDist>("MovePackageToDist");
-  toolchain->AddTaskType<UncompressDistPackage>("UncompressDistPackage");
-  toolchain->AddTaskType<ConfigurePackage>("ConfigurePackage");
-  toolchain->AddTaskType<CompilePackage>("CompilePackage");
-  toolchain->AddTaskType<InstallPackage>("InstallPackage");
-  toolchain->AddTaskType<SetupDistEnvironment>("SetupDistEnvironment");
-  toolchain->AddTaskType<CheckCompiler>("CheckCompiler");
-  toolchain->AddTaskType<ExecuteTasklist>("ExecuteTasklist");
+      toolchain->AddTaskType<CreateTemporaryUser>("CreateTemporaryUser");
+      toolchain->AddTaskType<DeleteTemporaryUser>("DeleteTemporaryUser");
+      toolchain->AddTaskType<CreateBuildEnv>("CreateBuildEnv");
+      toolchain->AddTaskType<GiveToolchainToTemporaryUser>("GiveToolchainToTemporaryUser");
+      toolchain->AddTaskType<MovePackageToDist>("MovePackageToDist");
+      toolchain->AddTaskType<UncompressDistPackage>("UncompressDistPackage");
+      toolchain->AddTaskType<ConfigurePackage>("ConfigurePackage");
+      toolchain->AddTaskType<CompilePackage>("CompilePackage");
+      toolchain->AddTaskType<InstallPackage>("InstallPackage");
+      toolchain->AddTaskType<SetupDistEnvironment>("SetupDistEnvironment");
+      toolchain->AddTaskType<CheckCompiler>("CheckCompiler");
+      toolchain->AddTaskType<ExecuteTasklist>("ExecuteTasklist");
     }
     else
     {
@@ -79,40 +101,110 @@ TOOLCHAIN_MODULE_API void ToolchainModule::InitTasks(const std::shared_ptr<hArgs
   }
 }
 
-void Toolchain::InitTasks()
+TOOLCHAIN_MODULE_API void ToolchainModule::Refresh(const std::shared_ptr<hArgs> &args)
 {
-
-  this->pool_name = 'toolchains.' + this->name.c_str();
-
-  if(!taskProcessorCreated)
+  if (args != NULL)
   {
+    std::shared_ptr<Toolchain> toolchain = args->get<std::shared_ptr<Toolchain>>("toolchain", nullptr);
 
-  {
-    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-    args->add("processor_name", this->pool_name);
-    CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskProcessor", "vortex.modules.builtin.tasks");
-    CToolchainModule->m_interface->CallInputEvent(args, "StartTaskProcessor", "vortex.modules.builtin.tasks");
-  }
-  {
-    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-    args->add("pool_name", this->pool_name);
-    CToolchainModule->m_interface->CallInputEvent(args, "CreateTaskPool", "vortex.modules.builtin.tasks");
-  }
-  taskProcessorCreated = true;
-  }
+    if (toolchain != NULL)
+    {
+      CToolchainModule->m_interface->LogInfo("Refreshing toolchain " + toolchain->name + " from " + toolchain->configFilePath);
+      nlohmann::json toolchainData = VortexMaker::DumpJSON(toolchain->configFilePath);
 
-  this->AddTaskType<CreateTemporaryUser>("CreateTemporaryUser");
-  this->AddTaskType<DeleteTemporaryUser>("DeleteTemporaryUser");
-  this->AddTaskType<CreateBuildEnv>("CreateBuildEnv");
-  this->AddTaskType<GiveToolchainToTemporaryUser>("GiveToolchainToTemporaryUser");
-  this->AddTaskType<MovePackageToDist>("MovePackageToDist");
-  this->AddTaskType<UncompressDistPackage>("UncompressDistPackage");
-  this->AddTaskType<ConfigurePackage>("ConfigurePackage");
-  this->AddTaskType<CompilePackage>("CompilePackage");
-  this->AddTaskType<InstallPackage>("InstallPackage");
-  this->AddTaskType<SetupDistEnvironment>("SetupDistEnvironment");
-  this->AddTaskType<CheckCompiler>("CheckCompiler");
-  this->AddTaskType<ExecuteTasklist>("ExecuteTasklist");
+      CToolchainModule->m_interface->LogInfo("Getting toolchain \"toolchain\" datas from " + toolchain->configFilePath);
+      toolchain->name = toolchainData["toolchain"]["name"].get<std::string>();
+      toolchain->author = toolchainData["toolchain"]["author"].get<std::string>();
+      toolchain->description = toolchainData["toolchain"]["description"].get<std::string>();
+      toolchain->version = toolchainData["toolchain"]["version"].get<std::string>();
+      toolchain->type = toolchainData["toolchain"]["type"].get<std::string>();
+      toolchain->state = toolchainData["toolchain"]["state"].get<std::string>();
+
+      CToolchainModule->m_interface->LogInfo("Getting toolchain \"configs\" datas from " + toolchain->configFilePath);
+      toolchain->builder_vendor = toolchainData["configs"]["builder_vendor"].get<std::string>();
+      toolchain->builder_arch = toolchainData["configs"]["builder_arch"].get<std::string>();
+      toolchain->builder_platform = toolchainData["configs"]["builder_platform"].get<std::string>();
+      toolchain->builder_cpu = toolchainData["configs"]["builder_cpu"].get<std::string>();
+      toolchain->builder_fpu = toolchainData["configs"]["builder_fpu"].get<std::string>();
+
+      toolchain->target_vendor = toolchainData["configs"]["target_vendor"].get<std::string>();
+      toolchain->target_arch = toolchainData["configs"]["target_arch"].get<std::string>();
+      toolchain->target_platform = toolchainData["configs"]["target_platform"].get<std::string>();
+      toolchain->target_cpu = toolchainData["configs"]["target_cpu"].get<std::string>();
+      toolchain->target_fpu = toolchainData["configs"]["target_fpu"].get<std::string>();
+
+      toolchain->host_vendor = toolchainData["configs"]["host_vendor"].get<std::string>();
+      toolchain->host_arch = toolchainData["configs"]["host_arch"].get<std::string>();
+      toolchain->host_platform = toolchainData["configs"]["host_platform"].get<std::string>();
+      toolchain->host_cpu = toolchainData["configs"]["host_cpu"].get<std::string>();
+      toolchain->host_fpu = toolchainData["configs"]["host_fpu"].get<std::string>();
+
+      toolchain->toolchain_type = toolchainData["configs"]["toolchain_type"].get<std::string>();
+      toolchain->compressionMode = toolchainData["configs"]["compression"].get<std::string>();
+
+      std::cout << toolchainData["data"]["packages"].get<std::string>() << std::endl;
+      CToolchainModule->m_interface->LogInfo("Getting toolchain \"data\" informations from " + toolchain->configFilePath);
+      std::cout << toolchainData["data"]["packages"].get<std::string>() << std::endl;
+
+      if (toolchainData["data"].contains("packages") && toolchainData["data"]["packages"].is_string())
+      {
+        toolchain->localPackagesPath = toolchainData["data"]["packages"].get<std::string>();
+      }
+
+      if (toolchainData["data"].contains("scripts") && toolchainData["data"]["scripts"].is_string())
+      {
+        toolchain->localScriptsPath = toolchainData["data"]["scripts"].get<std::string>();
+      }
+      CToolchainModule->m_interface->LogInfo("Refreshing packages asset of " + toolchain->name);
+      toolchain->registeredPackages.clear();
+      nlohmann::json packages = toolchainData["content"]["packages"];
+      for (auto &pkg : packages)
+      {
+
+        std::shared_ptr<PackageInterface> newPackageInterface = std::make_shared<PackageInterface>();
+        newPackageInterface->label = pkg["label"].get<std::string>();
+        newPackageInterface->emplacement = pkg["origin"].get<std::string>();
+        newPackageInterface->resolved = false;
+        toolchain->registeredPackages.push_back(newPackageInterface);
+      }
+
+      CToolchainModule->m_interface->LogInfo("Finding packages asset of " + toolchain->name);
+
+      {
+        std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+        args->add("packages", toolchain->packages);
+        args->add("list", toolchain->registeredPackages);
+
+        CToolchainModule->m_interface->CallInputEvent(args, "FindPackages", "vortex.modules.builtin.packages");
+
+        toolchain->packages = args->get<std::vector<std::shared_ptr<Package>>>("packages", toolchain->packages);
+        toolchain->registeredPackages = args->get<std::vector<std::shared_ptr<PackageInterface>>>("list", toolchain->registeredPackages);
+      }
+
+      {
+        std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+        args->add<std::shared_ptr<Toolchain>>("toolchain", toolchain);
+        CToolchainModule->m_interface->ExecFunction("InitTasks", args);
+      }
+
+      CToolchainModule->m_interface->LogInfo("Refreshing tasklists asset of " + toolchain->name);
+
+      toolchain->registeredTasklists.clear();
+      nlohmann::json tasklists = toolchainData["content"]["tasklists"];
+      for (auto &t : tasklists)
+      {
+        toolchain->RegisterTasklist(t["label"].get<std::string>());
+      }
+      CToolchainModule->m_interface->LogInfo("Finding tasklists asset of " + toolchain->name);
+      toolchain->FindTasklists();
+
+      CToolchainModule->m_interface->LogInfo("Refreshing toolchain " + toolchain->name + " is finish !");
+    }
+  }
+}
+
+TOOLCHAIN_MODULE_API void ToolchainModule::CreateTCSTask(const std::shared_ptr<hArgs> &args)
+{
 }
 
 static std::chrono::time_point<std::chrono::system_clock> stringToTimePoint(const std::string &timeString)
@@ -583,7 +675,7 @@ void Toolchain::DeleteCurrentToolchainSystem()
 
 void Toolchain::CreateCurrentToolchainSystem()
 {
-  
+
   this->DeleteCurrentToolchainSystem();
   // Recréer un dossier workingPaht
   std::string CreateWorkingHost = "sudo mkdir " + this->workingPath;
@@ -779,105 +871,6 @@ void Toolchain::FindTasklists()
     }
   }
 }
-
-void Toolchain::Refresh()
-{
-  CToolchainModule->m_interface->LogInfo("Refreshing toolchain " + this->name + " from " + this->configFilePath);
-  nlohmann::json toolchainData = VortexMaker::DumpJSON(this->configFilePath);
-
-  CToolchainModule->m_interface->LogInfo("Getting toolchain \"toolchain\" datas from " + this->configFilePath);
-  this->name = toolchainData["toolchain"]["name"].get<std::string>();
-  this->author = toolchainData["toolchain"]["author"].get<std::string>();
-  this->description = toolchainData["toolchain"]["description"].get<std::string>();
-  this->version = toolchainData["toolchain"]["version"].get<std::string>();
-  this->type = toolchainData["toolchain"]["type"].get<std::string>();
-  this->state = toolchainData["toolchain"]["state"].get<std::string>();
-
-  CToolchainModule->m_interface->LogInfo("Getting toolchain \"configs\" datas from " + this->configFilePath);
-  this->builder_vendor = toolchainData["configs"]["builder_vendor"].get<std::string>();
-  this->builder_arch = toolchainData["configs"]["builder_arch"].get<std::string>();
-  this->builder_platform = toolchainData["configs"]["builder_platform"].get<std::string>();
-  this->builder_cpu = toolchainData["configs"]["builder_cpu"].get<std::string>();
-  this->builder_fpu = toolchainData["configs"]["builder_fpu"].get<std::string>();
-
-  this->target_vendor = toolchainData["configs"]["target_vendor"].get<std::string>();
-  this->target_arch = toolchainData["configs"]["target_arch"].get<std::string>();
-  this->target_platform = toolchainData["configs"]["target_platform"].get<std::string>();
-  this->target_cpu = toolchainData["configs"]["target_cpu"].get<std::string>();
-  this->target_fpu = toolchainData["configs"]["target_fpu"].get<std::string>();
-
-  this->host_vendor = toolchainData["configs"]["host_vendor"].get<std::string>();
-  this->host_arch = toolchainData["configs"]["host_arch"].get<std::string>();
-  this->host_platform = toolchainData["configs"]["host_platform"].get<std::string>();
-  this->host_cpu = toolchainData["configs"]["host_cpu"].get<std::string>();
-  this->host_fpu = toolchainData["configs"]["host_fpu"].get<std::string>();
-
-  this->toolchain_type = toolchainData["configs"]["toolchain_type"].get<std::string>();
-  this->compressionMode = toolchainData["configs"]["compression"].get<std::string>();
-
-  std::cout << toolchainData["data"]["packages"].get<std::string>() << std::endl;
-  CToolchainModule->m_interface->LogInfo("Getting toolchain \"data\" informations from " + this->configFilePath);
-  std::cout << toolchainData["data"]["packages"].get<std::string>() << std::endl;
-
-  if (toolchainData["data"].contains("packages") && toolchainData["data"]["packages"].is_string())
-  {
-    this->localPackagesPath = toolchainData["data"]["packages"].get<std::string>();
-  }
-
-  if (toolchainData["data"].contains("scripts") && toolchainData["data"]["scripts"].is_string())
-  {
-    this->localScriptsPath = toolchainData["data"]["scripts"].get<std::string>();
-  }
-  CToolchainModule->m_interface->LogInfo("Refreshing packages asset of " + this->name);
-  registeredPackages.clear();
-  nlohmann::json packages = toolchainData["content"]["packages"];
-  for (auto &pkg : packages)
-  {
-
-    std::shared_ptr<PackageInterface> newPackageInterface = std::make_shared<PackageInterface>();
-    newPackageInterface->label = pkg["label"].get<std::string>();
-    newPackageInterface->emplacement = pkg["origin"].get<std::string>();
-    newPackageInterface->resolved = false;
-    registeredPackages.push_back(newPackageInterface);
-  }
-
-  CToolchainModule->m_interface->LogInfo("Finding packages asset of " + this->name);
-
-std::cout << "f" << std::endl;
- // this->FindPackages();
-  {
-    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-    args->add("packages", this->packages);
-    args->add("list", this->registeredPackages);
-
-    CToolchainModule->m_interface->CallInputEvent(args, "FindPackages", "vortex.modules.builtin.packages");
-
-    this->packages = args->get<std::vector<std::shared_ptr<Package>>>("packages", this->packages);
-    this->registeredPackages = args->get<std::vector<std::shared_ptr<PackageInterface>>>("list", this->registeredPackages);
-  }
-std::cout << "f" << std::endl;
-  //this->InitTasks();
-  {
-    std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
-    args->add<std::shared_ptr<Toolchain>>("toolchain", std::make_shared<Toolchain>(*this));
-    CToolchainModule->m_interface->ExecFunction("InitTasks", args);
-  }
-
-  CToolchainModule->m_interface->LogInfo("Refreshing tasklists asset of " + this->name);
-
-  registeredTasklists.clear();
-  nlohmann::json tasklists = toolchainData["content"]["tasklists"];
-  for (auto &t : tasklists)
-  {
-    this->RegisterTasklist(t["label"].get<std::string>());
-  }
-  CToolchainModule->m_interface->LogInfo("Finding tasklists asset of " + this->name);
-  this->FindTasklists();
-
-  CToolchainModule->m_interface->LogInfo("Refreshing toolchain " + this->name + " is finish !");
-  // this->Init();
-}
-
 void ToolchainCurrentSystem::Save(std::shared_ptr<Toolchain> parent)
 {
   nlohmann::json data = this->Extract();

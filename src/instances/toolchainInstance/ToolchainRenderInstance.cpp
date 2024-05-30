@@ -8,12 +8,11 @@ ToolchainRenderInstance::ToolchainRenderInstance(VxContext *ctx, std::shared_ptr
     this->m_ctx = ctx;
     this->toolchain = _toolchain;
 
+
     this->Refresh();
-    std::cout << "D9" << std::endl;
+
     this->toolchain->RefreshCurrentWorkingToolchain();
-    std::cout << "D8" << std::endl;
     this->toolchain->RefreshSnapshots();
-    std::cout << "D7" << std::endl;
 
     {
         uint32_t w, h;
@@ -408,11 +407,14 @@ void ToolchainRenderInstance::Refresh()
     // TODO: BEFORE ALL, REFRESH API INSTANCE OF THIS HOST
 
     VortexMaker::LogInfo("Core", "Start refreshing " + this->name);
-    std::cout << "D" << std::endl;
-    this->toolchain->Refresh();
-    std::cout << "D*" << std::endl;
+
+    {
+        std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
+        args->add<std::shared_ptr<Toolchain>>("toolchain", this->toolchain);
+        CToolchainModule->m_interface->ExecFunction("Refresh", args);
+      }
+
     this->toolchain->RefreshDistConfig();
-    std::cout << "D**" << std::endl;
     // Refresh dist
 
     std::shared_ptr<hArgs> args = std::make_shared<hArgs>();
